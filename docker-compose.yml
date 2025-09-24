@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  api:
+    build: .
+    container_name: idiompace_api
+    ports:
+      - "4021:3000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    restart: always
+
+  db:
+    image: postgres:17.4
+    container_name: postgres_idiompace
+    labels:
+      icon: https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/PostgreSQL/icon.png
+    restart: always
+    ports:
+      - "5434:5432"   # Puerto externo 5434 → interno 5432
+    environment:
+      POSTGRES_DB: idiompacedb
+      POSTGRES_USER: idiompace_user
+      POSTGRES_PASSWORD: idiompce_pass
+    env_file:
+      - .env  
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
