@@ -19,10 +19,6 @@ services:
     restart: always
     ports:
       - "5434:5432"   # Puerto externo 5434 → interno 5432
-    environment:
-      POSTGRES_DB: idiompacedb
-      POSTGRES_USER: idiompace_user
-      POSTGRES_PASSWORD: idiompce_pass
     env_file:
       - .env  
     volumes:
