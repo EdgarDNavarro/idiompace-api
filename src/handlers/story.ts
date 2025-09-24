@@ -1,0 +1,80 @@
+import { Request, Response } from 'express';
+import Story from '../models/Story.model';
+import { paginate } from '../utils/paginate';
+
+export const getStories = async (req: Request, res: Response) => {
+  const pagination = (req as any).pagination;
+
+  const result = await paginate(Story, {order: [['id', 'ASC']], include: ['tests'], distinct: true}, pagination);
+
+  res.json(result);
+};
+
+export const getStoryById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const story = await Story.findByPk(id, {
+    include: ['tests']
+  });
+  if (!story) {
+    res.status(404).json({ error: 'Story not found' });
+    return;
+  }
+  res.json({ data: story });
+};
+
+export const createStory = async (req: Request, res: Response) => {
+  try {
+    const story = await Story.create(req.body);
+    res.status(201).json({ data: story });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: 'Invalid story data' });
+  }
+};
+
+export const updateStory = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const story = await Story.findByPk(id);
+
+  if (!story) {
+    res.status(404).json({ error: 'Story not found' });
+    return;
+  }
+
+  try {
+    await story.update(req.body);
+    await story.save();
+    res.send("Story updated successfully");
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: 'Invalid update data' });
+  }
+};
+
+export const toggleIsInteractive = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const story = await Story.findByPk(id);
+
+  if (!story) {
+    res.status(404).json({ error: 'Story not found' });
+    return;
+  }
+
+  story.is_interactive = !story.dataValues.is_interactive;
+  await story.save();
+
+  res.json({ data: story });
+};
+
+export const deleteStory = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const story = await Story.findByPk(id);
+
+  if (!story) {
+    res.status(404).json({ error: 'Story not found' });
+    return;
+  }
+
+  await story.destroy();
+  res.json({ data: 'Story deleted successfully' });
+};
