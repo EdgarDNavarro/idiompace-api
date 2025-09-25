@@ -4,11 +4,12 @@ services:
     build: .
     container_name: idiompace_api
     ports:
-      - "4021:3000"
+      - "4021:4001"
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: always
 
   db:
@@ -21,6 +22,11 @@ services:
       - "5434:5432"   # Puerto externo 5434 → interno 5432
     env_file:
       - .env  
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
