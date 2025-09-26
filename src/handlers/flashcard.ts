@@ -91,28 +91,25 @@ export const markCorrect = async (req: Request, res: Response) => {
         const card = await Flashcards.findByPk(req.params.id);
         if (!card) {
             res.status(404).json({ error: "Flashcard no encontrada" });
-            return
+            return;
         }
+
         card.successCount += 1;
         card.lastReviewedAt = new Date();
-    
-        // aumentar la facilidad un poco
+
         card.easiness = Math.min(card.easiness + 0.1, 3.0);
-    
-        // duplicar el intervalo (1 → 2 → 4 → 8…)
-        card.interval = Math.round(card.interval * card.easiness);
-    
-        // programar la próxima revisión
+
+        card.interval = Math.max(1, Math.round(card.interval * card.easiness));
+
         const next = new Date();
-        next.setDate(next.getDate() + Math.round(card.interval));
+        next.setHours(next.getHours() + card.interval);
         card.nextReviewAt = next;
-    
+
         await card.save();
-    
         res.sendStatus(200);
     } catch (error) {
         console.log(error);
-        
+        res.status(500).json({ error: error.message });
     }
 }
 
@@ -121,26 +118,24 @@ export const markWrong = async (req: Request, res: Response) => {
         const card = await Flashcards.findByPk(req.params.id);
         if (!card) {
             res.status(404).json({ error: "Flashcard no encontrada" });
-            return
+            return;
         }
+
         card.failCount += 1;
         card.lastReviewedAt = new Date();
 
-        // reducir la facilidad
         card.easiness = Math.max(card.easiness - 0.2, 1.3);
 
-        // resetear el intervalo
-        card.interval = 1;
+        card.interval = 1; 
 
-        // próxima revisión = mañana
         const next = new Date();
-        next.setDate(next.getDate() + 1);
+        next.setMinutes(next.getMinutes() + 15);
         card.nextReviewAt = next;
 
         await card.save();
-    
         res.sendStatus(200);
     } catch (error) {
         console.log(error);
+        res.status(500).json({ error: error.message });
     }
 }

@@ -1,8 +1,8 @@
-import { betterAuth } from "better-auth";
+import { betterAuth, BetterAuthOptions } from "better-auth";
 import { admin } from "better-auth/plugins";
 import { Pool } from "pg";
 
-export const auth = betterAuth({
+const betterAuthConfig: BetterAuthOptions = {
   database: new Pool({
     connectionString: process.env.DATABASE_URL!,
   }),
@@ -17,12 +17,15 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET!,
   baseURL: process.env.BETTER_AUTH_URL!,
   // Aquí agregas la configuración “advanced”
-  advanced: {
+  plugins: [admin()],
+}
+
+if(process.env.NODE_ENV === "production") {
+  betterAuthConfig.advanced = {
     useSecureCookies: true,  // fuerza cookies seguras siempre
     crossSubDomainCookies: {
       enabled: true,
-      domain: "dnavarro.dev",  // o ".dnavarro.dev", lo que englobe tu dominio
-      // additionalCookies: [ ... ] si defines cookies personalizadas
+      domain: "dnavarro.dev",  
     },
     defaultCookieAttributes: {
       httpOnly: true,
@@ -31,13 +34,13 @@ export const auth = betterAuth({
     },
     cookies: {
       session_token: {
-        name: "better-auth.session_token",  // o tu prefijo
+        name: "better-auth.session_token",  
         attributes: {
           httpOnly: true,
           secure: true,
         },
       },
     },
-  },
-  plugins: [admin()],
-});
+  };
+}
+export const auth = betterAuth(betterAuthConfig);
