@@ -27,9 +27,11 @@ const server = express()
 
 const corsOptions: CorsOptions = {
     origin: function(origin, callbac) {
-        if(origin === process.env.FRONTEND_URL || origin === process.env.FRONTEND_URL_ADMIN) {
+        if(origin === process.env.FRONTEND_URL || origin === process.env.FRONTEND_URL_ADMIN || origin === process.env.N8N_URL) {
             callbac(null, true)
         } else {
+            console.log("origin:", origin);
+            
             callbac(new Error('Denegado por Cors'))
         }
     }, 
