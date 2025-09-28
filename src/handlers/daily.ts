@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Daily from "../models/Daily.Model";
+import { Op } from "sequelize";
 
 // Crear un daily
 export const createDaily = async (req: Request, res: Response) => {
@@ -26,8 +27,8 @@ export const getTodayDaily = async (req: Request, res: Response) => {
         const daily = await Daily.findOne({
             where: {
                 createdAt: {
-                    $gte: today,
-                    $lt: tomorrow,
+                    [Op.gte]: today,
+                    [Op.lt]: tomorrow,
                 },
             },
         });
