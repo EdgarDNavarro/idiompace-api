@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Daily from "../models/Daily.Model";
 import { Op } from "sequelize";
+import { paginate } from "../utils/paginate";
 
 // Crear un daily
 export const createDaily = async (req: Request, res: Response) => {
@@ -46,8 +47,12 @@ export const getTodayDaily = async (req: Request, res: Response) => {
 // Listar todos los daily
 export const listDailies = async (req: Request, res: Response) => {
     try {
-        const dailies = await Daily.findAll({ order: [["createdAt", "DESC"]] });
-        res.json({ data: dailies });
+
+        const pagination = (req as any).pagination;
+
+        const result = await paginate(Daily, { order: [["createdAt", "DESC"]] }, pagination);
+
+        res.json(result);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

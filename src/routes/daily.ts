@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { body } from "express-validator";
 import { createDaily, getTodayDaily, listDailies } from "../handlers/daily";
-import { handleInputErrors } from "../middleware";
+import { handleInputErrors, pagination } from "../middleware";
 import { requireAuth } from "../middleware/authMiddleware";
 
 const router = Router();
@@ -28,6 +28,7 @@ router.get(
 router.get(
     "/",
     requireAuth,
+    pagination(10, 30),
     listDailies
 );
 
