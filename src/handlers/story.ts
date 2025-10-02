@@ -1,13 +1,43 @@
 import { Request, Response } from 'express';
 import Story from '../models/Story.model';
 import { paginate } from '../utils/paginate';
+import { Op } from 'sequelize';
 
 export const getStories = async (req: Request, res: Response) => {
   const pagination = (req as any).pagination;
+  const { idiom, title, category } = req.query;
+  try {
+    const where: any = {};
+    if (idiom) {
+      where.idiom = idiom;
+    }
+    if (title) {
+      where.title = {
+        [Op.iLike]: `%${title}%`
+      };
+    }
+    if (category) {
+      where.categories = {
+        [Op.contains]: [category]  // busca que el array JSONB contenga el valor
+      };
+    }
 
-  const result = await paginate(Story, {order: [['id', 'ASC']], include: ['tests'], distinct: true}, pagination);
+    const result = await paginate(
+      Story,
+      {
+        order: [['id', 'ASC']],
+        include: ['tests'],
+        distinct: true,
+        where,
+      },
+      pagination
+    );
 
-  res.json(result);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 };
 
 export const getStoryById = async (req: Request, res: Response) => {
