@@ -1,15 +1,12 @@
 import { Request, Response } from "express";
 import Flashcards from "../models/Flashcards.model";
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
+import Decks from "../models/Decks.Model";
 
 // Crear una flashcard
 export const createFlashcard = async (req: Request, res: Response) => {
     try {
-        const flashcardData = {
-            ...req.body,
-            userId: (req as any).session.user.id
-        }
-        const flashcard = await Flashcards.create(flashcardData);
+        const flashcard = await Flashcards.create(req.body);
         res.status(201).json({ data: flashcard });
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -19,12 +16,12 @@ export const createFlashcard = async (req: Request, res: Response) => {
 // Listar flashcards por userId
 export const getFlashcards = async (req: Request, res: Response) => {
     try {
-        const userId = (req as any).session.user.id;
-        if (!userId) {
-            res.status(400).json({ error: "userId es requerido" });
+        const deckId = (req as any).params.deckId;
+        if (!deckId) {
+            res.status(400).json({ error: "deckId es requerido" });
             return
         }
-        const flashcards = await Flashcards.findAll({ where: { userId } });
+        const flashcards = await Flashcards.findAll({ where: { deckId } });
         res.json({ data: flashcards });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -34,14 +31,14 @@ export const getFlashcards = async (req: Request, res: Response) => {
 // Listar flashcards a estudiar
 export const getDueFlashcards = async (req: Request, res: Response) => {
     try {
-        const userId = (req as any).session.user.id;
-        if (!userId) {
-            res.status(400).json({ error: "userId es requerido" });
+        const deckId = (req as any).params.deckId;
+        if (!deckId) {
+            res.status(400).json({ error: "deckId es requerido" });
             return
         }
         const flashcards = await Flashcards.findAll({
             where: {
-                userId,
+                deckId,
                     [Op.or]: [
                         { nextReviewAt: { [Op.lte]: new Date() } },
                         { nextReviewAt: { [Op.is]: null } }, // 👈 incluir nuevas
@@ -139,3 +136,65 @@ export const markWrong = async (req: Request, res: Response) => {
         res.status(500).json({ error: error.message });
     }
 }
+
+//Decks
+// Crear una deck
+export const createDeck = async (req: Request, res: Response) => {
+    try {
+        const deckData = {
+            ...req.body,
+            userId: (req as any).session.user.id
+        }
+        const deck = await Decks.create(deckData);
+        res.status(201).json({ data: deck });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+// Listar decks por userId
+export const getDecks = async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).session.user.id;
+        if (!userId) {
+            res.status(400).json({ error: "userId es requerido" });
+            return
+        }
+        const decks = await Decks.findAll({
+            where: { userId },
+            attributes: {
+                include: [
+                    [
+                        Sequelize.fn("COUNT", Sequelize.col("flashcards.id")),
+                        "flashcardCount"
+                    ]
+                ]
+            },
+            include: [
+                {
+                    model: Flashcards,
+                    as: "flashcards", 
+                    attributes: [], 
+                }
+            ],
+            group: ["Decks.id"],
+        });
+        res.json({ data: decks });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const deleteDeck = async (req: Request, res: Response) => {
+    try {
+        const deck = await Decks.findByPk(req.params.id);
+        if (!deck) {
+            res.status(404).json({ error: "Deck no encontrado" });
+            return
+        }
+        await deck.destroy();
+        res.json({ message: "Deck eliminado correctamente" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

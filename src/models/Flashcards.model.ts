@@ -1,4 +1,5 @@
 import { Column, DataType, ForeignKey, Model, Table} from 'sequelize-typescript';
+import Decks from './Decks.Model';
 
 @Table({
   tableName: 'flashcards',
@@ -68,12 +69,13 @@ class Flashcards extends Model {
   })
   declare nextReviewAt: Date;
 
+  @ForeignKey(() => Decks)
   @Column({
-    type: DataType.STRING(200), 
+    type: DataType.INTEGER,
     allowNull: false,
+    onDelete: 'CASCADE'
   })
-  declare userId: string;
-
+  declare deckId: number;
 }
 
 export default Flashcards;
