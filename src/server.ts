@@ -6,6 +6,8 @@ import routerStories from "./routes/stories";
 import routerTests from "./routes/tests";
 import routerFlashcard from "./routes/flashcards";
 import routerDaily from "./routes/daily";
+import routerVocabulary from "./routes/vocabularies";
+import routerExercise from "./routes/exercises";
 import morgan from "morgan";
 import db from "./config/db";
 import { toNodeHandler } from "better-auth/node";
@@ -47,6 +49,8 @@ server.use(express.json())
 server.use('/api/stories', routerStories)
 server.use('/api/tests', routerTests)
 server.use('/api/flashcards', routerFlashcard)
+server.use('/api/exercises', routerExercise)
+server.use('/api/vocabularies', routerVocabulary)
 server.use('/api/daily', routerDaily)
 
 server.get('/api', (req, res) => {

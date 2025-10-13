@@ -26,7 +26,7 @@ export const getStories = async (req: Request, res: Response) => {
       Story,
       {
         order: [['id', 'ASC']],
-        include: ['tests'],
+        include: ['tests', 'vocabularies', 'exercises'],
         distinct: true,
         where,
       },
@@ -43,7 +43,7 @@ export const getStories = async (req: Request, res: Response) => {
 export const getStoryById = async (req: Request, res: Response) => {
   const { id } = req.params;
   const story = await Story.findByPk(id, {
-    include: ['tests']
+    include: ['tests', 'vocabularies', 'exercises']
   });
   if (!story) {
     res.status(404).json({ error: 'Story not found' });
