@@ -52,6 +52,37 @@ export const getDueFlashcards = async (req: Request, res: Response) => {
     }
 };
 
+export const getAllDueFlashcards = async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).session.user.id;
+        if (!userId) {
+            res.status(400).json({ error: "userId es requerido" });
+            return
+        }
+        const decks = await Decks.findAll({ where: { userId } });
+        const deckIds = decks.map(deck => deck.id);
+        const deckId = { [Op.in]: deckIds };
+        if (!deckId) {
+            res.status(400).json({ error: "deckId es requerido" });
+            return
+        }
+        
+        const flashcards = await Flashcards.findAll({
+            where: {
+                deckId,
+                    [Op.or]: [
+                        { nextReviewAt: { [Op.lte]: new Date() } },
+                        { nextReviewAt: { [Op.is]: null } }, // 👈 incluir nuevas
+                    ] // tarjetas "vencidas"
+            },
+            order: [['failCount', 'DESC']], // prioriza las más falladas
+        });
+        res.json({ data: flashcards });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // Editar una flashcard
 export const updateFlashcard = async (req: Request, res: Response) => {
     try {

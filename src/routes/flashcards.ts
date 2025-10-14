@@ -11,6 +11,7 @@ import {
     getDecks,
     createDeck,
     deleteDeck,
+    getAllDueFlashcards,
 } from "../handlers/flashcard";
 import { handleInputErrors } from "../middleware";
 import { requireAuth } from "../middleware/authMiddleware";
@@ -36,6 +37,13 @@ router.get(
     param("deckId").notEmpty().withMessage("El parámetro 'id' es obligatorio"),
     handleInputErrors,
     getDueFlashcards
+);
+
+router.get(
+    "/all/due",
+    requireAuth,
+    handleInputErrors,
+    getAllDueFlashcards
 );
 
 // Listar flashcards por deckId

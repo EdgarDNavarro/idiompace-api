@@ -8,6 +8,8 @@ import routerFlashcard from "./routes/flashcards";
 import routerDaily from "./routes/daily";
 import routerVocabulary from "./routes/vocabularies";
 import routerExercise from "./routes/exercises";
+import routerStreak from "./routes/streaks";
+
 import morgan from "morgan";
 import db from "./config/db";
 import { toNodeHandler } from "better-auth/node";
@@ -52,6 +54,7 @@ server.use('/api/flashcards', routerFlashcard)
 server.use('/api/exercises', routerExercise)
 server.use('/api/vocabularies', routerVocabulary)
 server.use('/api/daily', routerDaily)
+server.use('/api/streaks', routerStreak)
 
 server.get('/api', (req, res) => {
     res.json({msg: "Desde api"})
