@@ -4,3 +4,4 @@ package-lock.json
 build
 coverage
 better-auth_migrations/
+migrations

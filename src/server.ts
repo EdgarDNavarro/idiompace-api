@@ -9,6 +9,7 @@ import routerDaily from "./routes/daily";
 import routerVocabulary from "./routes/vocabularies";
 import routerExercise from "./routes/exercises";
 import routerStreak from "./routes/streaks";
+import routerDictionary from "./routes/dictionary";
 
 import morgan from "morgan";
 import db from "./config/db";
@@ -31,7 +32,7 @@ const server = express()
 
 const corsOptions: CorsOptions = {
     origin: function(origin, callbac) {
-        if(origin === process.env.FRONTEND_URL || origin === process.env.FRONTEND_URL_ADMIN || origin === process.env.N8N_URL) {
+        if(origin === process.env.FRONTEND_URL || origin === process.env.FRONTEND_URL_ADMIN || origin === process.env.N8N_URL || !origin) {
             callbac(null, true)
         } else {
             console.log("origin:", origin);
@@ -55,6 +56,7 @@ server.use('/api/exercises', routerExercise)
 server.use('/api/vocabularies', routerVocabulary)
 server.use('/api/daily', routerDaily)
 server.use('/api/streaks', routerStreak)
+server.use('/api/dictionary', routerDictionary)
 
 server.get('/api', (req, res) => {
     res.json({msg: "Desde api"})

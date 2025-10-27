@@ -56,6 +56,19 @@ class Story extends Model {
   })
   declare level: 'low' | 'middle' | 'high';
 
+  @Column({
+    type: DataType.STRING(200),
+    allowNull: false,
+    defaultValue: "default",
+  })
+  declare voice: string;
+
+  @Column({
+    type: DataType.STRING(200), 
+    allowNull: true,
+  })
+  declare userId: string;
+
   @HasMany(() => Test)
   declare tests: Test[];
 
