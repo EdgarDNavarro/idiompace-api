@@ -127,7 +127,7 @@ export const generateStoryWithIA = async (req: Request, res: Response) => {
         });
 
         const storyPrompt = `
-            Genera un texto corto en ${idiom} (aproximadamente de 2 minuto de duración al generar el audio con un tts) con el fin de aprender ${idiom}, yo tengo un nivel ${level} de ${idiom} así que la historia tiene que tener este nivel para aprender cosas nuevas pero que no sea imposible de aprender. Estas son las categorias a la que pertenece la historia: ${categories.join(", ")}.
+            Genera una historia en ${idiom} (aproximadamente de 1 minuto y medio de duración al generar el audio con un tts) con el fin de aprender ${idiom}, yo tengo un nivel ${level} de ${idiom} así que la historia tiene que tener este nivel para aprender cosas nuevas pero que no sea imposible de aprender. Estas son las categorias a la que pertenece la historia: ${categories.join(", ")}.
 
             No agregues secciones aparte de la historia, ni seccion de vocabulario ni nada por el estilo, solo el contenido del texto
         `;
@@ -178,6 +178,8 @@ Traduce solo las frases (no el título ni la descripción). No incluyas explicac
 
         const parsedIdiom = idiom.toLowerCase();
 
+        console.log("Generating audio for story:", storyJson.title, voice_name);
+
         for (const phrase of storyJson.phrases) {
 
             let idiomPhrase = phrase.english
@@ -190,7 +192,7 @@ Traduce solo las frases (no el título ni la descripción). No incluyas explicac
                 voice_id,
                 {
                     text: idiomPhrase,
-                    modelId: "eleven_multilingual_v2",
+                    modelId: "eleven_turbo_v2_5",
                     outputFormat: "mp3_44100_128",
                     previousRequestIds: requestIds.slice(-3),
                     languageCode: parsedIdiom.startsWith("en") ? "en" : "es",

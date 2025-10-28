@@ -25,7 +25,7 @@ router.get(
 );
 
 router.post(
-    "/",
+    "/with-ia",
     requireAuth,
     body("idiom").notEmpty().withMessage("El Idioma es obligatorio"),
     body("voice_id").notEmpty().withMessage("El voice_id es obligatorio"),
@@ -42,7 +42,7 @@ router.post(
 );
 
 router.post(
-    "/with-ia",
+    "/",
     requireAuth,
     body("title").notEmpty().withMessage("El título es obligatorio"),
     body("idiom").notEmpty().withMessage("El Idioma es obligatorio"),
