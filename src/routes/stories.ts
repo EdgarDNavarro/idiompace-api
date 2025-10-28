@@ -7,6 +7,7 @@ import {
     updateStory,
     toggleIsInteractive,
     deleteStory,
+    generateStoryWithIA,
 } from '../handlers/story';
 import { handleInputErrors, pagination } from "../middleware";
 import { requireAuth } from "../middleware/authMiddleware";
@@ -25,6 +26,23 @@ router.get(
 
 router.post(
     "/",
+    requireAuth,
+    body("idiom").notEmpty().withMessage("El Idioma es obligatorio"),
+    body("voice_id").notEmpty().withMessage("El voice_id es obligatorio"),
+    body("voice_name").notEmpty().withMessage("El voice_name es obligatorio"),
+    body("categories")
+        .isArray()
+        .withMessage("categories debe ser un array")
+        .default([]),
+    body("level")
+        .isIn(["low", "middle", "high"])
+        .withMessage("level debe ser 'low', 'middle' o 'high'"),
+    handleInputErrors,
+    generateStoryWithIA
+);
+
+router.post(
+    "/with-ia",
     requireAuth,
     body("title").notEmpty().withMessage("El título es obligatorio"),
     body("idiom").notEmpty().withMessage("El Idioma es obligatorio"),
@@ -56,7 +74,7 @@ router.post(
         .isIn(["low", "middle", "high"])
         .withMessage("level debe ser 'low', 'middle' o 'high'"),
     handleInputErrors,
-    createStory
+    generateStoryWithIA
 );
 
 router.put(

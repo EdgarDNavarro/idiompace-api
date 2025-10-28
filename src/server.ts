@@ -3,13 +3,11 @@ import express from "express";
 import colors from "colors";
 import cors, { CorsOptions } from 'cors'
 import routerStories from "./routes/stories";
-import routerTests from "./routes/tests";
 import routerFlashcard from "./routes/flashcards";
 import routerDaily from "./routes/daily";
 import routerVocabulary from "./routes/vocabularies";
 import routerExercise from "./routes/exercises";
 import routerStreak from "./routes/streaks";
-import routerDictionary from "./routes/dictionary";
 
 import morgan from "morgan";
 import db from "./config/db";
@@ -50,13 +48,11 @@ server.all("/api/auth/*", toNodeHandler(auth));
 server.use(express.json())
 
 server.use('/api/stories', routerStories)
-server.use('/api/tests', routerTests)
 server.use('/api/flashcards', routerFlashcard)
 server.use('/api/exercises', routerExercise)
 server.use('/api/vocabularies', routerVocabulary)
 server.use('/api/daily', routerDaily)
 server.use('/api/streaks', routerStreak)
-server.use('/api/dictionary', routerDictionary)
 
 server.get('/api', (req, res) => {
     res.json({msg: "Desde api"})

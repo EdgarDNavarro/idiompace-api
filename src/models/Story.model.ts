@@ -1,5 +1,4 @@
 import { Column, DataType, Model, Table, Default, HasMany } from 'sequelize-typescript';
-import Test from './Tests.model';
 import Vocabulary from './Vocabulary.Model';
 import Exercise from './Exercise.Model';
 
@@ -68,9 +67,6 @@ class Story extends Model {
     allowNull: true,
   })
   declare userId: string;
-
-  @HasMany(() => Test)
-  declare tests: Test[];
 
   @HasMany(() => Vocabulary)
   declare vocabularies: Vocabulary[];
