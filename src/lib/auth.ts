@@ -3,6 +3,7 @@ import { admin } from "better-auth/plugins";
 import { Pool } from "pg";
 import { stripe } from "@better-auth/stripe"
 import Stripe from "stripe"
+import SubscriptionUsage from "../models/SubscriptionUsage.Model";
 const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2025-09-30.clover", // Latest API version as of Stripe SDK v19
 })
@@ -52,7 +53,71 @@ const betterAuthConfig: BetterAuthOptions = {
                        stories: 30,
                   }
               }
-          ]
+          ],
+          onSubscriptionUpdate: async ({ event, subscription }) => {
+            
+            try {
+              if(!subscription.stripeSubscriptionId) return;
+              const usage = await SubscriptionUsage.findOne({ where: { stripeSubscriptionId: subscription.stripeSubscriptionId } });
+
+              if (!usage) return;
+
+              // Detectar renovación mensual
+              if (new Date(subscription.periodStart).getTime() !== new Date(usage.periodStart).getTime()) {
+
+                usage.storiesUsed = 0;
+                usage.periodStart = subscription.periodStart;
+                usage.periodEnd = subscription.periodEnd;
+              }
+
+              // Detectar cambio de plan
+              // if (usage.priceId !== subscription.priceId) {
+              //   // usage.storiesUsed = 0;
+              //   console.log(`Plan changed from ${usage.priceId} to ${subscription.priceId}`);
+              //   usage.priceId = subscription.priceId;
+              // }
+
+              usage.status = subscription.status;
+              await usage.save();
+
+            } catch (error) {
+              console.error("Error updating subscription:", error);
+            }
+          },
+          onSubscriptionComplete: async ({ subscription, stripeSubscription }) => {
+              
+              try {
+                const existing = await SubscriptionUsage.findOne({
+                  where: { stripeSubscriptionId: stripeSubscription.id },
+                });
+                if (existing) return; // ya existe, no duplicar
+
+                await SubscriptionUsage.create({
+                  userId: subscription.referenceId,
+                  stripeSubscriptionId: stripeSubscription.id,
+                  storiesUsed: 0,
+                  status: stripeSubscription.status,
+                  priceId: stripeSubscription.items.data[0].price.id,
+                  periodStart: subscription.periodStart,
+                  periodEnd: subscription.periodEnd
+                });
+              } catch (error) {
+                console.error("Error creating SubscriptionUsage:", error);
+              }
+          },
+          onSubscriptionCancel: async ({ subscription }) => {
+            try {
+              const usage = await SubscriptionUsage.findOne({
+                where: { stripeSubscriptionId: subscription.stripeSubscriptionId },
+              });
+              if (usage) {
+                usage.status = "canceled";
+                await usage.save();
+              }
+            } catch (error) {
+              
+            }
+          }
       }
     })
   ],
