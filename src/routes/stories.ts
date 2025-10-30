@@ -8,6 +8,9 @@ import {
     toggleIsInteractive,
     deleteStory,
     generateStoryWithIA,
+    addOneUsage,
+    getUsageByUserId,
+    getStoryByVoice,
 } from '../handlers/story';
 import { handleInputErrors, pagination } from "../middleware";
 import { requireAuth } from "../middleware/authMiddleware";
@@ -22,6 +25,15 @@ router.get(
     param("id").isInt().withMessage("ID inválido"),
     handleInputErrors,
     getStoryById
+);
+
+router.get(
+    "/voice/:voice/idiom/:idiom",
+    requireAuth,
+    param("voice").notEmpty().withMessage("voice inválido"),
+    param("idiom").notEmpty().withMessage("idiom inválido"),
+    handleInputErrors,
+    getStoryByVoice
 );
 
 router.post(
@@ -111,6 +123,22 @@ router.delete(
     param("id").isInt().withMessage("ID inválido"),
     handleInputErrors,
     deleteStory
+);
+
+router.get(
+    "/usage/:userId",
+    requireAuth,
+    param("userId").notEmpty().withMessage("ID inválido"),
+    handleInputErrors,
+    getUsageByUserId
+)
+
+router.put(
+    "/usage/:id",
+    requireAuth,
+    param("id").notEmpty().withMessage("ID inválido"),
+    handleInputErrors,
+    addOneUsage
 );
 
 export default router

@@ -8,6 +8,7 @@ import axios from "axios";
 import OpenAI from "openai";
 import Vocabulary from "../models/Vocabulary.Model";
 import Exercise from "../models/Exercise.Model";
+import SubscriptionUsage from '../models/SubscriptionUsage.Model';
 const elevenlabs = new ElevenLabsClient();
 
 const openai = new OpenAI();
@@ -53,6 +54,20 @@ export const getStoryById = async (req: Request, res: Response) => {
   const { id } = req.params;
   const story = await Story.findByPk(id, {
     include: ['vocabularies', 'exercises']
+  });
+  if (!story) {
+    res.status(404).json({ error: 'Story not found' });
+    return;
+  }
+  res.json({ data: story });
+};
+
+export const getStoryByVoice = async (req: Request, res: Response) => {
+  const { voice, idiom } = req.params;
+
+  const story = await Story.findOne({
+    where: { voice, idiom },
+    attributes: ['voice', 'idiom', 'title', 'id', 'level']
   });
   if (!story) {
     res.status(404).json({ error: 'Story not found' });
@@ -130,6 +145,8 @@ export const generateStoryWithIA = async (req: Request, res: Response) => {
             Genera una historia en ${idiom} (aproximadamente de 1 minuto y medio de duración al generar el audio con un tts) con el fin de aprender ${idiom}, yo tengo un nivel ${level} de ${idiom} así que la historia tiene que tener este nivel para aprender cosas nuevas pero que no sea imposible de aprender. Estas son las categorias a la que pertenece la historia: ${categories.join(", ")}.
 
             No agregues secciones aparte de la historia, ni seccion de vocabulario ni nada por el estilo, solo el contenido del texto
+
+            Asegurate que la duracion de la historia sea aproximadamente de 1 minuto y medio al generar el audio con un tts asi que no crees historias muy cortas ni simplemente una conversacion
         `;
 
         const storyResponse = await openai.chat.completions.create({
@@ -325,3 +342,44 @@ Traduce solo las frases (no el título ni la descripción). No incluyas explicac
         console.error("❌ Error generating story:", error);
     }
 };
+
+export const getUsageByUserId = async (req: Request, res: Response) => {
+    try {
+        const { userId } = req.params;
+
+        const usage = await SubscriptionUsage.findOne({
+            where: { userId, status: 'active' }
+        });
+
+        if (!usage) {
+            res.status(404).json({ error: 'Usage not found' });
+            return
+        }
+
+        res.json({ data: usage });
+    } catch (error) {
+        console.error("❌ Error generating story:", error);
+        res.status(500).json({ error: 'Error generating story' });
+    }
+}
+
+export const addOneUsage = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+
+        const usage = await SubscriptionUsage.findByPk(id);
+
+        if (!usage) {
+            res.status(404).json({ error: 'Usage not found' });
+            return
+        }
+
+        usage.storiesUsed = usage.storiesUsed + 1;
+        await usage.save();
+
+        res.json({ data: usage });
+    } catch (error) {
+        console.error("❌ Error generating story:", error);
+        res.status(500).json({ error: 'Error generating story' });
+    }
+}
