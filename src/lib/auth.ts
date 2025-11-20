@@ -4,9 +4,7 @@ import { Pool } from "pg";
 import { stripe } from "@better-auth/stripe"
 import Stripe from "stripe"
 import SubscriptionUsage from "../models/SubscriptionUsage.Model";
-const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: "2025-09-30.clover", // Latest API version as of Stripe SDK v19
-})
+const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 const betterAuthConfig: BetterAuthOptions = {
   database: new Pool({
