@@ -2,6 +2,7 @@
 node_modules/
 package-lock.json
 build
+dist
 coverage
 better-auth_migrations/
 migrations
