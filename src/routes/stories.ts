@@ -11,9 +11,9 @@ import {
     addOneUsage,
     getUsageByUserId,
     getStoryByVoice,
-} from '../handlers/story';
-import { handleInputErrors, pagination } from "../middleware";
-import { requireAuth } from "../middleware/authMiddleware";
+} from '../handlers/story.js';
+import { handleInputErrors, pagination } from "../middleware/index.js";
+import { requireAuth } from "../middleware/authMiddleware.js";
 const router = Router()
 
 

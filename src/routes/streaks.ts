@@ -1,13 +1,13 @@
 import { Router } from "express";
-import { requireAuth } from "../middleware/authMiddleware";
+import { requireAuth } from "../middleware/authMiddleware.js";
 import { body } from "express-validator";
 import {
     getStreak,
     createStreak,
     updateStreak,
     resetStreak
-} from "../handlers/streak";
-import { handleInputErrors } from "../middleware";
+} from "../handlers/streak.js";
+import { handleInputErrors } from "../middleware/index.js";
 
 const router = Router();
 

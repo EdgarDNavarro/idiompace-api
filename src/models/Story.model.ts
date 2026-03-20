@@ -1,6 +1,6 @@
 import { Column, DataType, Model, Table, Default, HasMany } from 'sequelize-typescript';
-import Vocabulary from './Vocabulary.Model';
-import Exercise from './Exercise.Model';
+import Vocabulary from './Vocabulary.Model.js';
+import Exercise from './Exercise.Model.js';
 
 @Table({
   tableName: 'stories',

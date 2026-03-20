@@ -13,10 +13,10 @@ import {
     deleteDeck,
     getAllDueFlashcards,
     uploadCsv,
-} from "../handlers/flashcard";
-import { handleInputErrors } from "../middleware";
-import { requireAuth } from "../middleware/authMiddleware";
-import { upload } from "../middleware/upload";
+} from "../handlers/flashcard.js";
+import { handleInputErrors } from "../middleware/index.js";
+import { requireAuth } from "../middleware/authMiddleware.js";
+import { upload } from "../middleware/upload.js";
 
 const router = Router();
 

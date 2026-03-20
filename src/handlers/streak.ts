@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Streak from "../models/Streak.Model";
+import Streak from "../models/Streak.Model.js";
 
 export const getStreak = async (req: Request, res: Response) => {
     try {

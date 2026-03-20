@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import Daily from "../models/Daily.Model";
+import Daily from "../models/Daily.Model.js";
 import { Op } from "sequelize";
-import { paginate } from "../utils/paginate";
+import { paginate } from "../utils/paginate.js";
 
 // Crear un daily
 export const createDaily = async (req: Request, res: Response) => {

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import Flashcards from "../models/Flashcards.model";
 import { Op, Sequelize } from "sequelize";
-import Decks from "../models/Decks.Model";
+import Decks from "../models/Decks.Model.js";
 import { parse } from "csv-parse/sync";
+import Flashcards from "../models/Flashcards.Model.js";
 
 // Crear una flashcard
 export const createFlashcard = async (req: Request, res: Response) => {
@@ -87,7 +87,7 @@ export const getAllDueFlashcards = async (req: Request, res: Response) => {
 // Editar una flashcard
 export const updateFlashcard = async (req: Request, res: Response) => {
     try {
-        const flashcard = await Flashcards.findByPk(req.params.id);
+        const flashcard = await Flashcards.findByPk(Number(req.params.id));
         if (!flashcard) {
             res.status(404).json({ error: "Flashcard no encontrada" });
             return
@@ -103,7 +103,7 @@ export const updateFlashcard = async (req: Request, res: Response) => {
 // Eliminar una flashcard
 export const deleteFlashcard = async (req: Request, res: Response) => {
     try {
-        const flashcard = await Flashcards.findByPk(req.params.id);
+        const flashcard = await Flashcards.findByPk(Number(req.params.id));
         if (!flashcard) {
             res.status(404).json({ error: "Flashcard no encontrada" });
             return
@@ -117,7 +117,7 @@ export const deleteFlashcard = async (req: Request, res: Response) => {
 
 export const markCorrect = async (req: Request, res: Response) => {
     try {
-        const card = await Flashcards.findByPk(req.params.id);
+        const card = await Flashcards.findByPk(Number(req.params.id));
         if (!card) {
             res.status(404).json({ error: "Flashcard no encontrada" });
             return;
@@ -144,7 +144,7 @@ export const markCorrect = async (req: Request, res: Response) => {
 
 export const markWrong = async (req: Request, res: Response) => {
     try {
-        const card = await Flashcards.findByPk(req.params.id);
+        const card = await Flashcards.findByPk(Number(req.params.id));
         if (!card) {
             res.status(404).json({ error: "Flashcard no encontrada" });
             return;
@@ -219,7 +219,7 @@ export const getDecks = async (req: Request, res: Response) => {
 
 export const deleteDeck = async (req: Request, res: Response) => {
     try {
-        const deck = await Decks.findByPk(req.params.id);
+        const deck = await Decks.findByPk(Number(req.params.id));
         if (!deck) {
             res.status(404).json({ error: "Deck no encontrado" });
             return

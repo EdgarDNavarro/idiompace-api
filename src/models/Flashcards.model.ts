@@ -1,5 +1,5 @@
 import { Column, DataType, ForeignKey, Model, Table} from 'sequelize-typescript';
-import Decks from './Decks.Model';
+import Decks from './Decks.Model.js';
 
 @Table({
   tableName: 'flashcards',

@@ -1,6 +1,6 @@
 // src/utils/paginate.ts
 import { FindAndCountOptions, Model } from "sequelize";
-import { Pagination } from "../middleware";
+import { Pagination } from "../middleware/index.js";
 
 export async function paginate<T extends Model>(
   model: any,

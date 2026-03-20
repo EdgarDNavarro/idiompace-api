@@ -5,9 +5,9 @@ import {
     deleteVocabulary,
     getVocabularies,
     updateVocabulary
-} from "../handlers/vocabulary";
-import { handleInputErrors } from "../middleware";
-import { requireAuth } from "../middleware/authMiddleware";
+} from "../handlers/vocabulary.js";
+import { handleInputErrors } from "../middleware/index.js";
+import { requireAuth } from "../middleware/authMiddleware.js";
 
 const router = Router();
 

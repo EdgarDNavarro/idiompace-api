@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
-import Story from "../models/Story.model";
-import { paginate } from "../utils/paginate";
+import Story from "../models/Story.Model.js";
+import { paginate } from "../utils/paginate.js";
 import { Op } from "sequelize";
 
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 import axios from "axios";
 import OpenAI from "openai";
-import Vocabulary from "../models/Vocabulary.Model";
-import Exercise from "../models/Exercise.Model";
-import SubscriptionUsage from "../models/SubscriptionUsage.Model";
+import Vocabulary from "../models/Vocabulary.Model.js";
+import Exercise from "../models/Exercise.Model.js";
+import SubscriptionUsage from "../models/SubscriptionUsage.Model.js";
 const elevenlabs = new ElevenLabsClient();
 
 const openai = new OpenAI();
@@ -69,7 +69,7 @@ export const getStories = async (req: Request, res: Response) => {
 };
 
 export const getStoryById = async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = Number(req.params.id);
     const story = await Story.findByPk(id, {
         include: ["vocabularies", "exercises"],
     });
@@ -105,7 +105,7 @@ export const createStory = async (req: Request, res: Response) => {
 };
 
 export const updateStory = async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = Number(req.params.id);
     const story = await Story.findByPk(id);
 
     if (!story) {
@@ -124,7 +124,7 @@ export const updateStory = async (req: Request, res: Response) => {
 };
 
 export const toggleIsInteractive = async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = Number(req.params.id);
     const story = await Story.findByPk(id);
 
     if (!story) {
@@ -139,7 +139,7 @@ export const toggleIsInteractive = async (req: Request, res: Response) => {
 };
 
 export const deleteStory = async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = Number(req.params.id);
     const story = await Story.findByPk(id);
 
     if (!story) {
@@ -428,7 +428,7 @@ export const getUsageByUserId = async (req: Request, res: Response) => {
 
 export const addOneUsage = async (req: Request, res: Response) => {
     try {
-        const { id } = req.params;
+        const id = Number(req.params.id);
 
         const usage = await SubscriptionUsage.findByPk(id);
 

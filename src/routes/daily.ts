@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { body } from "express-validator";
-import { createDaily, getTodayDaily, listDailies } from "../handlers/daily";
-import { handleInputErrors, pagination } from "../middleware";
-import { requireAuth } from "../middleware/authMiddleware";
+import { createDaily, getTodayDaily, listDailies } from "../handlers/daily.js";
+import { handleInputErrors, pagination } from "../middleware/index.js";
+import { requireAuth } from "../middleware/authMiddleware.js";
 
 const router = Router();
 

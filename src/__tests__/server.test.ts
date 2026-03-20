@@ -1,6 +1,6 @@
 import request from 'supertest'
-import server, { connectDB } from '../server'
-import db from '../config/db'
+import server, { connectDB } from '../server.js'
+import db from '../config/db.js'
 
 describe("GET /api", () => {
     it('should send back a json response', async () => {

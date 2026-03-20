@@ -1,5 +1,5 @@
 import { exit } from 'node:process'
-import db from '../config/db'
+import db from '../config/db.js'
 
 const clearDB = async () => {
     try {

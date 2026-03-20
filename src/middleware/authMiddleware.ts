@@ -1,7 +1,7 @@
 // middlewares/authMiddleware.ts
 import { Request, Response, NextFunction } from "express";
 import { fromNodeHeaders } from "better-auth/node";
-import { auth } from "../lib/auth";
+import { auth } from "../lib/auth.js";
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {

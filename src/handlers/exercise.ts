@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Exercise from "../models/Exercise.Model";
+import Exercise from "../models/Exercise.Model.js";
 
 // Crear ejercicio
 export const createExercise = async (req: Request, res: Response) => {
@@ -26,7 +26,7 @@ export const getExercises = async (req: Request, res: Response) => {
 // Actualizar ejercicio
 export const updateExercise = async (req: Request, res: Response) => {
     try {
-        const exercise = await Exercise.findByPk(req.params.id);
+        const exercise = await Exercise.findByPk(Number(req.params.id));
         if (!exercise) {
             res.status(404).json({ error: "Exercise not found" });
             return;
@@ -42,7 +42,7 @@ export const updateExercise = async (req: Request, res: Response) => {
 // Eliminar ejercicio
 export const deleteExercise = async (req: Request, res: Response) => {
     try {
-        const exercise = await Exercise.findByPk(req.params.id);
+        const exercise = await Exercise.findByPk(Number(req.params.id));
         if (!exercise) {
             res.status(404).json({ error: "Exercise not found" });
             return;

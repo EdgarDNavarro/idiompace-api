@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import Vocabulary from "../models/Vocabulary.Model";
+import Vocabulary from "../models/Vocabulary.Model.js";
 
 // Crear vocabulario
 export const createVocabulary = async (req: Request, res: Response) => {
@@ -26,7 +26,7 @@ export const getVocabularies = async (req: Request, res: Response) => {
 // Actualizar vocabulario
 export const updateVocabulary = async (req: Request, res: Response) => {
     try {
-        const vocab = await Vocabulary.findByPk(req.params.id);
+        const vocab = await Vocabulary.findByPk(Number(req.params.id));
         if (!vocab) {
             res.status(404).json({ error: "Vocabulary not found" });
             return;
@@ -42,7 +42,7 @@ export const updateVocabulary = async (req: Request, res: Response) => {
 // Eliminar vocabulario
 export const deleteVocabulary = async (req: Request, res: Response) => {
     try {
-        const vocab = await Vocabulary.findByPk(req.params.id);
+        const vocab = await Vocabulary.findByPk(Number(req.params.id));
         if (!vocab) {
             res.status(404).json({ error: "Vocabulary not found" });
             return;

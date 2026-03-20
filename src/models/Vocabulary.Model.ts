@@ -1,5 +1,5 @@
 import { Column, DataType, Model, Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import Story from './Story.model';
+import Story from './Story.Model.js';
 
 @Table({
   tableName: 'vocabularies',
