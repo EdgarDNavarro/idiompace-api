@@ -2,6 +2,7 @@ import { Column, DataType, Model, Table, HasMany } from 'sequelize-typescript';
 import Flashcards from './Flashcards.Model.js';
 
 
+
 @Table({
   tableName: 'decks',
 })

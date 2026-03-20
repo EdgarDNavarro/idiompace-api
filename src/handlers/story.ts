@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import Story from "../models/Story.Model.js";
 import { paginate } from "../utils/paginate.js";
 import { Op } from "sequelize";
 
@@ -9,6 +8,7 @@ import OpenAI from "openai";
 import Vocabulary from "../models/Vocabulary.Model.js";
 import Exercise from "../models/Exercise.Model.js";
 import SubscriptionUsage from "../models/SubscriptionUsage.Model.js";
+import Story from "../models/Story.Model.js";
 const elevenlabs = new ElevenLabsClient();
 
 const openai = new OpenAI();
