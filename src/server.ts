@@ -2,17 +2,17 @@ import "dotenv/config";
 import express from "express";
 import colors from "colors";
 import cors, { CorsOptions } from 'cors'
-import routerStories from "./routes/stories";
-import routerFlashcard from "./routes/flashcards";
-import routerDaily from "./routes/daily";
-import routerVocabulary from "./routes/vocabularies";
-import routerExercise from "./routes/exercises";
-import routerStreak from "./routes/streaks";
+import routerStories from "./routes/stories.js";
+import routerFlashcard from "./routes/flashcards.js";
+import routerDaily from "./routes/daily.js";
+import routerVocabulary from "./routes/vocabularies.js";
+import routerExercise from "./routes/exercises.js";
+import routerStreak from "./routes/streaks.js";
 
 import morgan from "morgan";
-import db from "./config/db";
+import db from "./config/db.js";
 import { toNodeHandler } from "better-auth/node";
-import { auth } from "./lib/auth";
+import { auth } from "./lib/auth.js";
 
 export async function connectDB() {
     try {

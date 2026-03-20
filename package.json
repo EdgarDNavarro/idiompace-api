@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "dev": "nodemon --exec ts-node src/index.ts",
+    "dev": "nodemon --exec tsx src/index.ts",
     "start": "node ./build/index.js",
     "build": "tsc ",
     "test": "jest --detectOpenHandles",
@@ -28,6 +29,7 @@
     "ts-jest": "29.2.5",
     "ts-node": "10.9.2",
     "ts-node-dev": "2.0.0",
+    "tsx": "^4.21.0",
     "typescript": "5.6.3"
   },
   "dependencies": {

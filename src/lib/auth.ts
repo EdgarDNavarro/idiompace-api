@@ -1,9 +1,11 @@
 import { betterAuth, BetterAuthOptions } from "better-auth";
 import { admin } from "better-auth/plugins";
-import { Pool } from "pg";
+import pkg from "pg";
+
+const { Pool } = pkg;
 import { stripe } from "@better-auth/stripe"
 import Stripe from "stripe"
-import SubscriptionUsage from "../models/SubscriptionUsage.Model";
+import SubscriptionUsage from "../models/SubscriptionUsage.Model.js";
 const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 const betterAuthConfig: BetterAuthOptions = {
