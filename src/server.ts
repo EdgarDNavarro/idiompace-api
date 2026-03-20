@@ -13,16 +13,17 @@ import morgan from "morgan";
 import db from "./config/db.js";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
+import { initAssociations } from "./models/associations.js";
 
 export async function connectDB() {
     try {
         await db.authenticate()
-        // Importar asociaciones DESPUÉS de que Sequelize haya cargado los modelos
-        await import("./models/associations.js");
-        db.sync()
+        // Inicializar asociaciones DESPUÉS de que los modelos estén cargados
+        await initAssociations();
+        await db.sync()
         console.log(colors.magenta('BD conectada'))
     } catch (error) { 
-        // console.log(error);
+        console.log(error);
         console.log(colors.red.bold("Hubo un error al conectarr con la BD"));
     }
 }
