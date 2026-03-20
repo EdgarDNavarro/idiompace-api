@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Flashcards from "../models/Flashcards.model";
 import { Op, Sequelize } from "sequelize";
 import Decks from "../models/Decks.Model";
+import { parse } from "csv-parse/sync";
 
 // Crear una flashcard
 export const createFlashcard = async (req: Request, res: Response) => {
@@ -39,10 +40,10 @@ export const getDueFlashcards = async (req: Request, res: Response) => {
         const flashcards = await Flashcards.findAll({
             where: {
                 deckId,
-                    [Op.or]: [
-                        { nextReviewAt: { [Op.lte]: new Date() } },
-                        { nextReviewAt: { [Op.is]: null } }, // 👈 incluir nuevas
-                    ] // tarjetas "vencidas"
+                [Op.or]: [
+                    { nextReviewAt: { [Op.lte]: new Date() } },
+                    { nextReviewAt: { [Op.is]: null } }, // 👈 incluir nuevas
+                ] // tarjetas "vencidas"
             },
             order: [['failCount', 'DESC']], // prioriza las más falladas
         });
@@ -66,14 +67,14 @@ export const getAllDueFlashcards = async (req: Request, res: Response) => {
             res.status(400).json({ error: "deckId es requerido" });
             return
         }
-        
+
         const flashcards = await Flashcards.findAll({
             where: {
                 deckId,
-                    [Op.or]: [
-                        { nextReviewAt: { [Op.lte]: new Date() } },
-                        { nextReviewAt: { [Op.is]: null } }, // 👈 incluir nuevas
-                    ] // tarjetas "vencidas"
+                [Op.or]: [
+                    { nextReviewAt: { [Op.lte]: new Date() } },
+                    { nextReviewAt: { [Op.is]: null } }, // 👈 incluir nuevas
+                ] // tarjetas "vencidas"
             },
             order: [['failCount', 'DESC']], // prioriza las más falladas
         });
@@ -154,7 +155,7 @@ export const markWrong = async (req: Request, res: Response) => {
 
         card.easiness = Math.max(card.easiness - 0.2, 1.3);
 
-        card.interval = 1; 
+        card.interval = 1;
 
         const next = new Date();
         next.setMinutes(next.getMinutes() + 15);
@@ -204,8 +205,8 @@ export const getDecks = async (req: Request, res: Response) => {
             include: [
                 {
                     model: Flashcards,
-                    as: "flashcards", 
-                    attributes: [], 
+                    as: "flashcards",
+                    attributes: [],
                 }
             ],
             group: ["Decks.id"],
@@ -227,5 +228,97 @@ export const deleteDeck = async (req: Request, res: Response) => {
         res.json({ message: "Deck eliminado correctamente" });
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+};
+
+export const uploadCsv = async (req: Request, res: Response) => {
+    const { delimiter, deckId } = req.body;
+    
+    try {
+        if (!req.file) {
+            res.status(400).json({ error: "No se subió ningún archivo" });
+            return
+        }
+
+        if (!deckId) {
+            res.status(400).json({ error: "deckId es requerido" });
+            return
+        }
+
+        // Verificar que el deck existe y pertenece al usuario
+        const deck = await Decks.findOne({
+            where: {
+                id: deckId,
+                userId: (req as any).session.user.id
+            }
+        });
+
+        if (!deck) {
+            res.status(404).json({ error: "Deck no encontrado" });
+            return
+        }
+
+        const delimiterUsed = delimiter || ",";
+
+        const text = req.file.buffer.toString("utf8");
+
+        // Usar csv-parse para manejar correctamente comillas y escapado
+        let rows: string[][];
+        try {
+            rows = parse(text, {
+                delimiter: delimiterUsed,
+                relax_quotes: true,
+                skip_empty_lines: true,
+                trim: true,
+            });
+        } catch (parseError) {
+            res.status(400).json({ 
+                error: "Error al parsear el archivo CSV",
+                message: parseError.message 
+            });
+            return;
+        }
+
+        if (rows.length === 0) {
+            res.status(400).json({ error: "El archivo CSV está vacío" });
+            return
+        }
+
+        // Validar que todas las filas tengan exactamente 3 columnas
+        const invalidRows: number[] = [];
+        rows.forEach((row, index) => {
+            if (row.length !== 3) {
+                invalidRows.push(index + 1);
+            }
+        });
+
+        if (invalidRows.length > 0) {
+            res.status(400).json({ 
+                error: `El CSV debe tener exactamente 3 columnas (front, back, example)`,
+                invalidRows: invalidRows,
+                message: `Filas con formato incorrecto: ${invalidRows.join(", ")}`
+            });
+            return
+        }
+
+        // Crear las flashcards
+        const flashcardsToCreate = rows.map(([front, back, example]) => ({
+            deckId: deckId,
+            front: front.trim(),
+            back: back.trim(),
+            example: example.trim()
+        }));
+
+        const createdFlashcards = await Flashcards.bulkCreate(flashcardsToCreate);
+
+        res.json({
+            message: "Flashcards creadas correctamente",
+            count: createdFlashcards.length,
+            data: createdFlashcards
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error al procesar el CSV" });
     }
 };

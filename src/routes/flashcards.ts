@@ -12,9 +12,11 @@ import {
     createDeck,
     deleteDeck,
     getAllDueFlashcards,
+    uploadCsv,
 } from "../handlers/flashcard";
 import { handleInputErrors } from "../middleware";
 import { requireAuth } from "../middleware/authMiddleware";
+import { upload } from "../middleware/upload";
 
 const router = Router();
 
@@ -113,6 +115,14 @@ router.delete(
     requireAuth,  
     handleInputErrors,
     deleteDeck
+);
+
+router.post(
+    "/decks/flashcards/upload-csv",
+    requireAuth,  
+    handleInputErrors,
+    upload.single("file"),
+    uploadCsv
 );
 
 export default router;
