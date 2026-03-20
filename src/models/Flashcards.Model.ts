@@ -1,5 +1,4 @@
 import { Column, DataType, ForeignKey, Model, Table} from 'sequelize-typescript';
-import Decks from './Decks.Model.js';
 
 @Table({
   tableName: 'flashcards',
@@ -69,7 +68,7 @@ class Flashcards extends Model {
   })
   declare nextReviewAt: Date;
 
-  @ForeignKey(() => Decks)
+  @ForeignKey(() => null)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,

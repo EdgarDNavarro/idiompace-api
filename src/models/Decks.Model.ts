@@ -1,5 +1,4 @@
-import { Column, DataType, Model, Table, HasMany } from 'sequelize-typescript';
-import Flashcards from './Flashcards.Model.js';
+import { Column, DataType, Model, Table } from 'sequelize-typescript';
 
 
 
@@ -18,12 +17,6 @@ class Decks extends Model {
     allowNull: false,
   })
   declare userId: string;
-
-  @HasMany(() => Flashcards, {
-    onDelete: 'CASCADE',   
-    hooks: true,
-  })
-  declare flashcards: Flashcards[];
 }
 
 export default Decks;

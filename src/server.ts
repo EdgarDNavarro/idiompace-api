@@ -13,6 +13,8 @@ import morgan from "morgan";
 import db from "./config/db.js";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
+// Importar asociaciones después de que todos los modelos estén cargados
+import "./models/associations.js";
 
 export async function connectDB() {
     try {

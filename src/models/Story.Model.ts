@@ -1,6 +1,4 @@
-import { Column, DataType, Model, Table, Default, HasMany } from 'sequelize-typescript';
-import Vocabulary from './Vocabulary.Model.js';
-import Exercise from './Exercise.Model.js';
+import { Column, DataType, Model, Table, Default } from 'sequelize-typescript';
 
 @Table({
   tableName: 'stories',
@@ -67,12 +65,6 @@ class Story extends Model {
     allowNull: true,
   })
   declare userId: string;
-
-  @HasMany(() => Vocabulary)
-  declare vocabularies: Vocabulary[];
-
-  @HasMany(() => Exercise)
-  declare exercises: Exercise[];
 }
 
 export default Story;

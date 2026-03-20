@@ -1,5 +1,4 @@
-import { Table, Column, DataType, Model, BelongsTo, ForeignKey } from 'sequelize-typescript';
-import Story from './Story.Model.js';
+import { Table, Column, DataType, Model, ForeignKey } from 'sequelize-typescript';
 
 @Table({
   tableName: 'exercises',
@@ -47,15 +46,12 @@ class Exercise extends Model {
   })
   declare explanation: string;
 
-  @ForeignKey(() => Story)
+  @ForeignKey(() => null)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
   declare storyId: number;
-
-  @BelongsTo(() => Story)
-  declare story: Story;
 }
 
 export default Exercise;
