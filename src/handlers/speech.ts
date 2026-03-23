@@ -4,7 +4,6 @@ import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 // import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import WebSocket from "ws";
 
-const VOICE_ID = "21m00Tcm4TlvDq8ikWAM"; // Rachel - inglés nativo
 const TTS_MODEL = "eleven_flash_v2_5";    // Modelo de baja latencia
 
 const elevenlabs = new ElevenLabsClient();
@@ -38,10 +37,10 @@ export const getScribeToken = async (req: Request, res: Response) => {
 };
 
 export const wsChat = async (req: Request, res: Response) => {
-    const { text, sessionId } = req.body;
+    const { text, sessionId, voiceId, idiom } = req.body;
 
-    if (!text || !sessionId) {
-        return res.status(400).json({ error: "Faltan campos: text, sessionId" });
+    if (!text || !sessionId || !voiceId || !idiom) {
+        return res.status(400).json({ error: "Faltan campos: text, sessionId, voiceId, idiom" });
     }
 
     // Inicializar historial si es sesión nueva
@@ -58,7 +57,7 @@ export const wsChat = async (req: Request, res: Response) => {
 
     // ── Abrir WebSocket TTS con ElevenLabs ──────
     const ttsWs = new WebSocket(
-        `wss://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}/stream-input?model_id=${TTS_MODEL}`,
+        `wss://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream-input?model_id=${TTS_MODEL}`,
         { headers: { "xi-api-key": process.env.ELEVENLABS_API_KEY } }
     );
 
@@ -121,16 +120,18 @@ export const wsChat = async (req: Request, res: Response) => {
     try {
         const stream = await openai.chat.completions.create({
             model: "gpt-4.1-nano",
-            max_tokens: 150, // Respuestas cortas → conversación más natural
+            max_tokens: 250, // Respuestas cortas → conversación más natural
             messages: [
                 {
                     role: "system",
-                    content: `You are a friendly and patient native English teacher.
-    - Always respond in English, regardless of what language the student uses.
+                    content: `You are a friendly and patient native ${idiom} teacher.
+    - Always respond in ${idiom}, regardless of what language the student uses.
     - Keep your responses SHORT: maximum 2-3 sentences, like a real conversation.
+    - You can give slightly longer answers if the student wants you to explain a topic.
     - If the student makes a grammar or vocabulary mistake, correct it naturally within your response without interrupting the flow.
     - Be encouraging. Ask a follow-up question at the end to keep the conversation going.
-    - Adapt your vocabulary to the student's apparent level.`
+    - Adapt your vocabulary to the student's apparent level.
+    `
                 },
                 ...history
             ],

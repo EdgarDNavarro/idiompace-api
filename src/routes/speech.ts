@@ -12,6 +12,8 @@ router.post(
     // requireAuth,
     body("text").notEmpty().withMessage("El campo 'text' es obligatorio"),
     body("sessionId").notEmpty().withMessage("El campo 'sessionId' es obligatorio"),
+    body("voiceId").notEmpty().withMessage("El campo 'voiceId' es obligatorio"),
+    body("idiom").notEmpty().withMessage("El campo 'idiom' es obligatorio"),
     handleInputErrors,
     wsChat
 );
