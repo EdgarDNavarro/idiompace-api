@@ -74,6 +74,62 @@ const voicePersonalities: Record<string, { name: string; personality: string }> 
 };
 
 
+// Generar flashcards del historial de conversación
+export const generateFlashcards = async (req: Request, res: Response) => {
+    try {
+        const { sessionId } = req.params;
+        
+        if (!sessions.has(sessionId)) {
+            return res.status(404).json({ error: "Sesión no encontrada" });
+        }
+
+        const history = sessions.get(sessionId);
+        
+        if (history.length === 0) {
+            return res.json([]);
+        }
+
+        // Pedir a OpenAI que genere flashcards del historial
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            temperature: 0.7,
+            response_format: { type: "json_object" },
+            messages: [
+                {
+                    role: "system",
+                    content: `You are a language learning assistant. Analyze the conversation history and generate flashcards for the most important vocabulary, phrases, or grammar points discussed.
+
+Rules:
+- Generate 3-8 flashcards maximum (only the most valuable content)
+- Each flashcard must have:
+  * front: The word/phrase in the target language
+  * back: Translation or explanation
+  * example: A sentence using the word/phrase in context from the conversation (or create a relevant one)
+- Focus on new vocabulary, corrections made, or key phrases discussed
+- If no valuable learning content found, return empty array
+- Return ONLY valid JSON in this exact format: {"flashcards": [{"front": "...", "back": "...", "example": "..."}]}`
+                },
+                {
+                    role: "user",
+                    content: `Conversation history:\n${JSON.stringify(history, null, 2)}\n\nGenerate flashcards from this conversation.`
+                }
+            ]
+        });
+
+        const content = response.choices[0]?.message?.content;
+        if (!content) {
+            return res.json([]);
+        }
+
+        const result = JSON.parse(content);
+        res.json(result.flashcards || []);
+
+    } catch (error: any) {
+        console.error("[generateFlashcards] Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // Limpiar sesión de chat
 export const clearChatSession = async (req: Request, res: Response) => {
     try {

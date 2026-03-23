@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { body, param } from "express-validator";
-import { clearChatSession, getScribeToken, wsChat } from "../handlers/speech.js";
+import { clearChatSession, generateFlashcards, getScribeToken, wsChat } from "../handlers/speech.js";
 import { handleInputErrors } from "../middleware/index.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
 
@@ -23,6 +23,15 @@ router.get(
     requireAuth,
     getScribeToken
 )
+
+// Generar flashcards del historial
+router.get(
+    "/session/:sessionId/flashcards",
+    requireAuth,
+    param("sessionId").notEmpty().withMessage("El sessionId es obligatorio"),
+    handleInputErrors,
+    generateFlashcards
+);
 
 // Limpiar sesión de chat
 router.delete(
