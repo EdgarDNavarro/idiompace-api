@@ -14,6 +14,7 @@ import {
 } from '../handlers/story.js';
 import { handleInputErrors, pagination } from "../middleware/index.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
+import { storyAILimiter } from "../middleware/rateLimiter.js";
 const router = Router()
 
 
@@ -38,6 +39,7 @@ router.get(
 
 router.post(
     "/with-ia",
+    storyAILimiter, // Límite muy restrictivo: 5 historias por hora
     requireAuth,
     body("idiom").notEmpty().withMessage("El Idioma es obligatorio"),
     body("voice_id").notEmpty().withMessage("El voice_id es obligatorio"),

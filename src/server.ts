@@ -15,6 +15,7 @@ import db from "./config/db.js";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
 import { initAssociations } from "./models/associations.js";
+import { globalLimiter, authSignInLimiter } from "./middleware/rateLimiter.js";
 
 export async function connectDB() {
     try {
@@ -45,8 +46,18 @@ const corsOptions: CorsOptions = {
     methods: ["GET", "POST", "PUT", "DELETE"], 
     credentials: true,
 }
+server.set('trust proxy', 1) 
 server.use(cors(corsOptions))
 server.use(morgan('dev'))
+
+// Rate limiter global - protección general
+server.use(globalLimiter);
+
+// Rate limiters específicos para sign-in y sign-up (prevenir brute force)
+server.post("/api/auth/sign-in/*", authSignInLimiter);
+server.post("/api/auth/sign-up/*", authSignInLimiter);
+
+// Handler general de auth - sin rate limiter restrictivo para otros endpoints
 server.all("/api/auth/*", toNodeHandler(auth));
 
 server.use(express.json())

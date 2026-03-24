@@ -3,12 +3,14 @@ import { body, param } from "express-validator";
 import { clearChatSession, generateFlashcards, getScribeToken, wsChat } from "../handlers/speech.js";
 import { handleInputErrors } from "../middleware/index.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
+import { scribeTokenLimiter, chatStreamLimiter } from "../middleware/rateLimiter.js";
 
 const router = Router();
 
 // Chat con streaming de audio
 router.post(
     "/chat",
+    chatStreamLimiter, // 150 mensajes cada 15 minutos - permite conversación fluida
     // requireAuth,
     body("text").notEmpty().withMessage("El campo 'text' es obligatorio"),
     body("sessionId").notEmpty().withMessage("El campo 'sessionId' es obligatorio"),
@@ -20,6 +22,7 @@ router.post(
 
 router.get(
     "/scribe-token",
+    scribeTokenLimiter, // 10 tokens por hora - 1 por sesión de conversación
     requireAuth,
     getScribeToken
 )
