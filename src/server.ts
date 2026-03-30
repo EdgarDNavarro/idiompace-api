@@ -9,6 +9,7 @@ import routerVocabulary from "./routes/vocabularies.js";
 import routerExercise from "./routes/exercises.js";
 import routerStreak from "./routes/streaks.js";
 import routerSpeech from "./routes/speech.js";
+import routerUpload from "./routes/upload.js";
 
 import morgan from "morgan";
 import db from "./config/db.js";
@@ -69,6 +70,7 @@ server.use('/api/vocabularies', routerVocabulary)
 server.use('/api/daily', routerDaily)
 server.use('/api/streaks', routerStreak)
 server.use('/api/speech', routerSpeech)
+server.use('/api/upload', routerUpload)
 
 server.get('/api', (req, res) => {
     res.json({msg: "Desde api"})
