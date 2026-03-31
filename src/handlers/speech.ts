@@ -1,18 +1,115 @@
 import { Request, Response } from "express";
 import OpenAI from "openai";
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
-// import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import WebSocket from "ws";
+import crypto from "crypto";
 
-const TTS_MODEL = "eleven_flash_v2_5";    // Modelo de baja latencia
+const TTS_MODEL = "eleven_flash_v2_5";
 
 const elevenlabs = new ElevenLabsClient();
-
 const openai = new OpenAI();
 
 // Historial de conversación por sesión
-// const conversationHistory = new Map<string, Array<ChatCompletionMessageParam>>(); 
 const sessions = new Map();
+
+// ── Quota tracking (en memoria, por día) ─────────────────────────────────────
+const DAILY_QUOTA_MINUTES = 5;   // minutos totales de llamada por día por usuario
+const MAX_CALL_SECONDS    = 180; // máximo por llamada individual (3 min)
+
+interface UserQuota  { minutesUsed: number; date: string; }
+interface SessionInfo { userId: string; }
+
+const userQuotas    = new Map<string, UserQuota>();
+const activeSessions = new Map<string, SessionInfo>();
+
+function getUserQuota(userId: string): UserQuota {
+    const today = new Date().toISOString().split("T")[0];
+    const stored = userQuotas.get(userId);
+    if (!stored || stored.date !== today) {
+        const fresh = { minutesUsed: 0, date: today };
+        userQuotas.set(userId, fresh);
+        return fresh;
+    }
+    return stored;
+}
+
+// POST /speech/session/start — verifica cuota, obtiene token Scribe y registra sesión
+export const startSession = async (req: Request, res: Response) => {
+    const userId = (req as any).session?.user?.id;
+    if (!userId) { res.status(400).json({ error: "Sin sesión de usuario" }); return; }
+
+    const quota          = getUserQuota(userId);
+    const minutesRemaining = Math.max(0, DAILY_QUOTA_MINUTES - quota.minutesUsed);
+
+    if (minutesRemaining <= 0) {
+        res.status(429).json({
+            error: "Has alcanzado el límite diario de llamadas. Vuelve mañana.",
+            minutesRemaining: 0,
+            maxMinutes: DAILY_QUOTA_MINUTES,
+        });
+        return;
+    }
+
+    try {
+        const tokenResponse = await elevenlabs.tokens.singleUse.create("realtime_scribe");
+        const token = typeof tokenResponse === "string"
+            ? tokenResponse
+            : (tokenResponse as any).token ?? tokenResponse;
+
+        const sessionId = crypto.randomUUID();
+        activeSessions.set(sessionId, { userId });
+
+        res.json({
+            sessionId,
+            token,
+            allowedSeconds : Math.min(minutesRemaining * 60, MAX_CALL_SECONDS),
+            minutesRemaining,
+            maxMinutes: DAILY_QUOTA_MINUTES,
+        });
+    } catch (err) {
+        console.error("[startSession]", err);
+        res.status(500).json({ error: "No se pudo iniciar la sesión" });
+    }
+};
+
+// POST /speech/session/end — registra duración real y libera cuota consumida
+export const endSession = async (req: Request, res: Response) => {
+    const userId = (req as any).session?.user?.id;
+    const { sessionId, durationSeconds } = req.body;
+
+    if (!sessionId || typeof durationSeconds !== "number") {
+        res.status(400).json({ error: "Faltan campos: sessionId, durationSeconds" });
+        return;
+    }
+
+    const info = activeSessions.get(sessionId);
+    if (info && info.userId === userId) {
+        const minutesUsed = durationSeconds / 60;
+        const quota = getUserQuota(userId);
+        quota.minutesUsed = Math.min(quota.minutesUsed + minutesUsed, DAILY_QUOTA_MINUTES);
+        userQuotas.set(userId, quota);
+        activeSessions.delete(sessionId);
+    }
+
+    sessions.delete(sessionId);
+    res.json({ ok: true });
+};
+
+// GET /speech/quota — devuelve cuota del usuario para mostrar en la UI
+export const getQuota = async (req: Request, res: Response) => {
+    const userId = (req as any).session?.user?.id;
+    if (!userId) { res.status(400).json({ error: "Sin sesión de usuario" }); return; }
+
+    const quota          = getUserQuota(userId);
+    const minutesRemaining = Math.max(0, DAILY_QUOTA_MINUTES - quota.minutesUsed);
+
+    res.json({
+        minutesUsed: parseFloat(quota.minutesUsed.toFixed(1)),
+        minutesRemaining: parseFloat(minutesRemaining.toFixed(1)),
+        maxMinutes: DAILY_QUOTA_MINUTES,
+        canCall: minutesRemaining > 0,
+    });
+};
 
 // Perfiles de personalidad para cada voz
 const voicePersonalities: Record<string, { name: string; personality: string }> = {
@@ -153,9 +250,16 @@ export const getScribeToken = async (req: Request, res: Response) => {
 
 export const wsChat = async (req: Request, res: Response) => {
     const { text, sessionId, voiceId, idiom } = req.body;
+    const userId = (req as any).session?.user?.id;
 
     if (!text || !sessionId || !voiceId || !idiom) {
         return res.status(400).json({ error: "Faltan campos: text, sessionId, voiceId, idiom" });
+    }
+
+    // Validar que la sesión fue registrada y pertenece a este usuario
+    const sessionOwner = activeSessions.get(sessionId);
+    if (!sessionOwner || sessionOwner.userId !== userId) {
+        return res.status(403).json({ error: "Sesión inválida. Inicia una llamada desde la app." });
     }
 
     // Inicializar historial si es sesión nueva

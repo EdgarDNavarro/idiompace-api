@@ -1,24 +1,20 @@
-// middlewares/authMiddleware.ts
+// middlewares/authMiddleware.ts — Hackathon: sesión anónima por UUID en cookie
 import { Request, Response, NextFunction } from "express";
-import { fromNodeHeaders } from "better-auth/node";
-import { auth } from "../lib/auth.js";
+import crypto from "crypto";
 
-export async function requireAuth(req: Request, res: Response, next: NextFunction) {
-  try {
-    const session = await auth.api.getSession({
-      headers: fromNodeHeaders(req.headers),
-    });
+export function requireAuth(req: Request, res: Response, next: NextFunction) {
+    let userId = (req as any).cookies?.["anon_id"];
 
-    if (!session) {
-        res.status(401).json({ error: "No autorizado" });
-        return
+    if (!userId) {
+        userId = crypto.randomUUID();
+        res.cookie("anon_id", userId, {
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+            httpOnly: true,
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production",
+        });
     }
 
-    // Guardamos la sesión para usarla en el controlador
-    (req as any).session = session;
+    (req as any).session = { user: { id: userId } };
     next();
-  } catch (err) {
-    console.error("Auth error:", err);
-    res.status(500).json({ error: "Error en la autenticación" });
-  }
 }

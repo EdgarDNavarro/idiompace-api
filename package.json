@@ -16,6 +16,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "2.8.17",
     "@types/express": "5.0.0",
     "@types/jest": "29.5.13",
@@ -44,6 +45,7 @@
     "bcrypt": "^6.0.0",
     "better-auth": "^1.5.5",
     "colors": "1.4.0",
+    "cookie-parser": "^1.4.7",
     "cors": "2.8.5",
     "csv-parse": "^6.1.0",
     "dotenv": "16.4.5",

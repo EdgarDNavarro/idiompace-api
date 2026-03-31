@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import colors from "colors";
 import cors, { CorsOptions } from 'cors'
+import cookieParser from "cookie-parser";
 import routerStories from "./routes/stories.js";
 import routerFlashcard from "./routes/flashcards.js";
 import routerDaily from "./routes/daily.js";
@@ -13,10 +14,8 @@ import routerUpload from "./routes/upload.js";
 
 import morgan from "morgan";
 import db from "./config/db.js";
-import { toNodeHandler } from "better-auth/node";
-import { auth } from "./lib/auth.js";
 import { initAssociations } from "./models/associations.js";
-import { globalLimiter, authSignInLimiter } from "./middleware/rateLimiter.js";
+import { globalLimiter } from "./middleware/rateLimiter.js";
 
 export async function connectDB() {
     try {
@@ -47,19 +46,13 @@ const corsOptions: CorsOptions = {
     methods: ["GET", "POST", "PUT", "DELETE"], 
     credentials: true,
 }
-server.set('trust proxy', 1) 
+server.set('trust proxy', 1)
 server.use(cors(corsOptions))
 server.use(morgan('dev'))
+server.use(cookieParser())
 
 // Rate limiter global - protección general
 server.use(globalLimiter);
-
-// Rate limiters específicos para sign-in y sign-up (prevenir brute force)
-server.post("/api/auth/sign-in/*", authSignInLimiter);
-server.post("/api/auth/sign-up/*", authSignInLimiter);
-
-// Handler general de auth - sin rate limiter restrictivo para otros endpoints
-server.all("/api/auth/*", toNodeHandler(auth));
 
 server.use(express.json())
 

@@ -5,7 +5,8 @@ import {
     getStreak,
     createStreak,
     updateStreak,
-    resetStreak
+    resetStreak,
+    incrementStreak
 } from "../handlers/streak.js";
 import { handleInputErrors } from "../middleware/index.js";
 
@@ -39,6 +40,13 @@ router.post(
     requireAuth,
     handleInputErrors,
     resetStreak
+);
+
+router.post(
+    "/increment",
+    requireAuth,
+    handleInputErrors,
+    incrementStreak
 );
 
 export default router;
